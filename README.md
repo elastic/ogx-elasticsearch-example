@@ -19,7 +19,7 @@ source .venv/bin/activate
 Install the dependencies of the project using:
 
 ```bash
-pip -r requirements.txt
+pip install -r requirements.txt
 ```
 
 We need to configure the `.env` file copying the structure from the `.env.example` file.
