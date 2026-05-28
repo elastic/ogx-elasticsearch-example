@@ -32,10 +32,10 @@ cp .env.example .env
 We can edit the `.env` adding the missing information (e.g. `ELASTICSEARCH_API_KEY`, `OPENAI_API_KEY`):
 
 ```
-ELASTICSEARCH_URL=localhost:9200
+ELASTICSEARCH_URL=http://localhost:9200
 ELASTICSEARCH_API_KEY=your-api-key-here
 ELASTICSEARCH_INDEX_NAME=eu-documents
-OGX_URL=http://localhost:5000
+OGX_URL=http://localhost:8321
 OPENAI_API_KEY=your-api-key-here
 INFERENCE_MODEL="openai/gpt-5-mini-2025-08-07"
 EMBEDDING_MODEL="sentence-transformers/all-MiniLM-L6-v2"
