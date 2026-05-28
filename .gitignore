@@ -1,0 +1,12 @@
+# Ignore Python artifacts
+__pycache__/
+.venv/
+
+# Ignore environment variable files
+.env
+
+# Ignore local Elasticsearch installation directory
+.elastic-start-local/
+
+# Claude
+.claude/

@@ -1,0 +1,78 @@
+version: '2'
+image_name: elasticsearch-agent
+apis:
+  - inference
+  - vector_io
+  - files
+  - file_processors
+  - responses
+  - tool_runtime
+
+providers:
+  inference:
+    - provider_id: sentence-transformers
+      provider_type: inline::sentence-transformers
+      config:
+        trust_remote_code: false
+    - provider_id: openai
+      provider_type: remote::openai
+      config:
+        api_key: ${env.OPENAI_API_KEY}
+  vector_io:
+    - provider_id: elasticsearch
+      provider_type: remote::elasticsearch
+      config:
+        elasticsearch_url: ${env.ELASTICSEARCH_URL}
+        elasticsearch_api_key: ${env.ELASTICSEARCH_API_KEY}
+        persistence:
+          backend: kv_default
+          namespace: vector_io::elasticsearch
+  files:
+    - provider_id: localfs
+      provider_type: inline::localfs
+      config:
+        storage_dir: ${env.FILES_STORAGE_DIR:=~/.ogx/dummy/files}
+        metadata_store:
+          table_name: files_metadata
+          backend: sql_default
+  file_processors:
+    - provider_id: file-processor
+      provider_type: inline::auto
+      config: {}
+  responses:
+    - provider_id: responses
+      provider_type: inline::builtin
+      config:
+        persistence:
+          responses:
+            backend: sql_default
+            table_name: responses
+  tool_runtime:
+    - provider_id: file-search
+      provider_type: inline::file-search
+      config: {}
+
+registered_resources:
+  models:
+    - model_id: sentence-transformers/all-MiniLM-L6-v2
+      provider_id: sentence-transformers
+      provider_model_id: sentence-transformers/all-MiniLM-L6-v2
+      model_type: embedding
+      metadata:
+        embedding_dimension: 384
+
+vector_stores:
+  default_provider_id: "elasticsearch"
+  default_embedding_model:
+    provider_id: "sentence-transformers"
+    model_id: "all-MiniLM-L6-v2"
+
+  # Annotation: instruct the LLM to cite both document_id and chunk_id
+  annotation_prompt_params:
+    chunk_annotation_template: "[{index}] {metadata_text} cite as <|{file_id}|>\n{chunk_text}\n"
+    annotation_instruction_template: "Cite sources immediately at the end of sentences before punctuation. Each chunk has a document_id (the file_id shown as 'cite as') and a chunk_id inside its attributes. Use the format <|document_id:chunk_id|>. Example: 'This is a fact <|71213903-602c-460c-b0e8-ac43d38c41c6:a3f9e201-...|>.'. Do not add extra punctuation. Use only IDs visible in the metadata above."
+
+  # File processing during file ingestion
+  file_ingestion_params:
+    default_chunk_size_tokens: 200
+    default_chunk_overlap_tokens: 30
